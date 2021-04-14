@@ -5,19 +5,25 @@
 
 int main()
 {
-    char player[10] = "";
+    char player[6][10];
+    int gok[6];
     srand (time(NULL));
-    int rnd = rand() % 100 + 1, gok;
+    int rnd = rand() % 100 + 1;
 
-    printf("What is your name? ");
-    scanf("%s", &player);
-    printf("%s joined the party!\n", player);
-    printf("What is your guess? ");
-    scanf("%d", &gok);
+    printf("Fill in the 6 player names:\n");
+    for(int i = 0; i < 6; i++){
+        //printf("What is your name? ");
+        scanf("%s", &player[i][10]);
+        printf("%s joined the party!\n", player[i+1]);
+    }
 
-    printf("The number was %d\n", rnd);
+    for(int i = 0; i < 6; i++){
+        printf("%s, what is your guess? ", player[i+1]);
+        scanf("%d", &gok[i]);
+    }
 
-    if(gok == rnd){
+
+    /*if(gok == rnd){
         printf("Congratulations, you guessed it right!\n");
     }
     else if(gok > rnd){
@@ -29,7 +35,7 @@ int main()
     else{
         printf("Oops, something went terrible wrong.\n");
     }
-
+    */
     printf("The number was %d\n", rnd);
 
     return 0;
