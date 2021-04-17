@@ -22,26 +22,55 @@ int main()
         scanf("%d", &gok[i]);
     }
 
+    highest = gok[0];
+    lowest = gok[0];
+
     for(int i = 0; i < 5; i++){
         gok[i] = gok[i] - rnd;
     }
 
-    highest = gok[0];
-    lowest = gok[0];
-
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < 6; i++)
     {
-        if(gok[i] < gok[i+1])
-        {
-            highest = gok[i+1];
-        }
-        if(gok[i] > gok[i+1])
-        {
-            lowest = gok[i+1]; //Lowest werkt niet zonder lijn 25 en 26, gaat nooit in de if en neemt een radnom nummer.
+        if(i != 5){
+            if(gok[i] > gok[i+1])
+            {
+                highest = gok[i];
+            }
+            if(gok[i] < gok[i+1])
+            {
+                lowest = gok[i]; //Lowest werkt niet zonder lijn 25 en 26, gaat nooit in de if en neemt een radnom nummer.
+            }
+        }else{
+            if(gok[i] > highest){
+                highest = gok[i];
+            }
+            if(gok[i] < lowest){
+                lowest = gok[i];
+            }
         }
     }
 
-    int verste = highest + lowest;
+
+    printf("Dit is de hoogste %d, dit is de laagste %d\n", highest + rnd, lowest + rnd);
+
+
+    /*if(lowest < 0){
+        lowest = lowest + lowest + lowest;
+        highest = highest + highest + highest;
+    }
+    if( highest < 0){
+        lowest = lowest + lowest + lowest;
+        highest = highest + highest + highest;
+    }
+
+    if(highest > lowest){
+        printf("%d is de verste, er uit kut!\n", highest);
+    }
+    else if(lowest > highest){
+        printf("%d is de verste, er uit kut\n", lowest);
+    }*\
+
+    /*int verste = highest + lowest;
     if(verste > 0){
         printf("%d is het verste er van af!\n", highest);
     }
@@ -50,7 +79,7 @@ int main()
     }
     else{
         printf("Ze liggen er even ver van af!\n");
-    }
+    }*/
     //printf("Dit is de hoogste gok %d\n", highest);
     //printf("Dit is de laagste gok %d\n", lowest);
 
