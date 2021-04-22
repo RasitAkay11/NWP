@@ -22,8 +22,6 @@ int main()
         scanf("%d", &gok[i]);
     }
 
-
-
     for(int i = 0; i < 6; i++){
         gok[i] = gok[i] - rnd;
     }
@@ -40,23 +38,22 @@ int main()
         }
     }
 
+    //printf("Dit is de hoogste %d, dit is de laagste %d\n", highest+rnd, lowest+rnd);
 
-    printf("Dit is de hoogste %d, dit is de laagste %d\n", highest+rnd, lowest+rnd);
-
-    if(lowest < 0){
-        lowest = abs(lowest);
-        highest = abs(highest);
+    if(highest > 0 && lowest > 0){
+        printf("%d is the farest, ther our kut!", highest+rnd);
     }
-    if(highest < 0){
-        lowest = abs(lowest);
-        highest = abs(highest);
+    else if(highest < 0 && lowest < 0){
+        printf("%d is the farest, ther out kut!", lowest+rnd);
     }
-
-    if(highest > lowest){
-        printf("%d is de verste, er uit kut!\n", highest);
-    }
-    else if(lowest > highest){
-        printf("%d is de verste, er uit kut\n", lowest);
+    else if( (highest < 0 && lowest > 0) || (highest > 0 && lowest < 0)){
+        int result = lowest + highest;
+        if(result > 0){
+            printf("%d is the farest, ther our kut!", highest+rnd);
+        }
+        else{
+            printf("%d is the farest, ther out kut!", lowest+rnd);
+        }
     }
 
     printf("The number was %d\n", rnd);
