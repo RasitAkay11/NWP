@@ -17,7 +17,7 @@ int main()
     }
     printf("\nWelcome to the party %s, %s, %s, %s, %s, %s!\n\n", player[1], player[2], player[3], player[4], player[5], player[6]);
 
-    for(int i = 0; i < round; i++){
+    for(int i = 0; i < 6; i++){
         for(int i = 0; i < round; i++){
             printf("%s, what is your guess? ", player[i+1]);
             scanf("%d", &gok[i]);
@@ -61,8 +61,6 @@ int main()
             }
         }
 
-        printf("The number was %d\n", rnd);
-
         for(int i = r; i < round; i++){
             strcpy(player[i], player[i+1]);
         }
@@ -70,7 +68,7 @@ int main()
         for(int i = 0; i < round; i++){
             printf("%s ", player[i]);
         }
-        printf("\nNEXT ROUND LOADING....\n");
+        printf("\n\nNEXT ROUND LOADING....");
         round--;
     }
     return 0;
