@@ -17,7 +17,6 @@ int main()
     }
     printf("\nWelcome to the party %s, %s, %s, %s, %s, %s!\n\n", player[1], player[2], player[3], player[4], player[5], player[6]);
 
-
     for(int i = 0; i < round; i++){
         for(int i = 0; i < round; i++){
             printf("%s, what is your guess? ", player[i+1]);
@@ -72,6 +71,7 @@ int main()
             printf("%s ", player[i]);
         }
         printf("\nNEXT ROUND LOADING....\n");
+        round--;
     }
     return 0;
 }
