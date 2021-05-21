@@ -69,7 +69,7 @@ int main ( int argc, char * argv[] )
 
     //ontvang resultaat
     memset(buffer,0,256);
-    rs = zmq_recv(subscriber, buffer, 256,0);
+    zmq_recv(subscriber, buffer, 256,0);
     ParsedString = parse(3, buffer);
     printf("%s", ParsedString);
 
