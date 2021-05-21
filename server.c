@@ -35,6 +35,9 @@ int main ( int argc, char * argv[] )
     const char *FilterGok2 = (argc > 1)? argv [1]: "guessit>gok2!>";
     const char *FilterGok3 = (argc > 1)? argv [1]: "guessit>gok3!>";
     const char *FilterGok4 = (argc > 1)? argv [1]: "guessit>gok4!>";
+    const char *FilterGok5 = (argc > 1)? argv [1]: "guessit>gok5!>";
+    const char *FilterGok6 = (argc > 1)? argv [1]: "guessit>gok6!>";
+
     //variabelen
     int gok[6];
     srand(time(NULL));
@@ -60,8 +63,18 @@ int main ( int argc, char * argv[] )
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok4, 9);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok5, 9);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, 9);
 
     while (1) {
+        //ontvang gokken
+        for(int i = 0; i < 6; i++){
+            memset(buffer,0,256);
+            zmq_recv (subscriber, buffer, 256, 0);
+            ParsedString = parse(3, buffer);
+            printf("Player %d has guessed %s\n", i+1, ParsedString);
+            gok[i] = atoi(ParsedString);
+        }/*
         //ontvang gok1
         memset(buffer,0,256);
         zmq_recv (subscriber, buffer, 256, 0);
@@ -90,13 +103,29 @@ int main ( int argc, char * argv[] )
         printf("Player 4 has guessed %s\n", ParsedString);
         gok[3] = atoi(ParsedString);
 
+        //ontvang gok5
+        memset(buffer,0,256);
+        zmq_recv (subscriber, buffer, 256, 0);
+        ParsedString = parse(3, buffer);
+        printf("Player 5 has guessed %s\n", ParsedString);
+        gok[4] = atoi(ParsedString);
 
-        printf("player 1 %d, player 2 %d, player3 %d, player4 %d\n\n", gok[0], gok[1], gok[2], gok[3]);
+        //ontvang gok6
+        memset(buffer,0,256);
+        zmq_recv (subscriber, buffer, 256, 0);
+        ParsedString = parse(3, buffer);
+        printf("Player 6 has guessed %s\n", ParsedString);
+        gok[5] = atoi(ParsedString);
+        */
+
+        printf("player 1 %d, player 2 %d, player3 %d, player4 %d, player 5 %d, player 6 %d\n\n", gok[0], gok[1], gok[2], gok[3], gok[4], gok[5]);
 
         zmq_send(publisher, "guessit>gok?>You are player one.", 32,0);
         zmq_send(publisher, "guessit>gok2?>You are player two.", 33,0);
         zmq_send(publisher, "guessit>gok3?>You are player three.", 35,0);
         zmq_send(publisher, "guessit>gok4?>You are player four.", 34,0);
+        zmq_send(publisher, "guessit>gok5?>You are player five.", 35,0);
+        zmq_send(publisher, "guessit>gok6?>You are player six.", 34,0);
     break;
         /*
         //stuur restultaat
