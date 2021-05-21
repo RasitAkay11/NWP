@@ -32,10 +32,12 @@ int main ( int argc, char * argv[] )
 {
     //filter
     const char *FilterGok = (argc > 1)? argv [1]: "guessit>gok!>";
-
+    const char *FilterGok2 = (argc > 1)? argv [1]: "guessit>gok2!>";
+    const char *FilterGok3 = (argc > 1)? argv [1]: "guessit>gok3!>";
     //variabelen
+    int gok[6];
     srand(time(NULL));
-    int rnd = rand() % 100 + 1, guessplayer1;
+    int rnd = rand() % 100 + 1;
     char buffer [256];
     char *ParsedString;
 
@@ -54,14 +56,39 @@ int main ( int argc, char * argv[] )
         return EXIT_FAILURE;
     }
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok, 8);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
 
     while (1) {
-        //ontvang gok
+        //ontvang gok1
         memset(buffer,0,256);
         zmq_recv (subscriber, buffer, 256, 0);
         ParsedString = parse(3, buffer);
-        printf("The player has guessed %s\n", ParsedString);
+        printf("Player 1 has guessed %s\n", ParsedString);
+        gok[0] = atoi(ParsedString);
 
+        //ontvang gok2
+        memset(buffer,0,256);
+        zmq_recv (subscriber, buffer, 256, 0);
+        ParsedString = parse(3, buffer);
+        printf("Player 2 has guessed %s\n", ParsedString);
+        gok[1] = atoi(ParsedString);
+
+        //ontvang gok3
+        memset(buffer,0,256);
+        zmq_recv (subscriber, buffer, 256, 0);
+        ParsedString = parse(3, buffer);
+        printf("Player 3 has guessed %s\n", ParsedString);
+        gok[2] = atoi(ParsedString);
+
+
+        printf("player 1 %d, player 2 %d, player3 %d\n\n", gok[0], gok[1], gok[2]);
+
+        zmq_send(publisher, "guessit>gok?>You are player one.", 32,0);
+        zmq_send(publisher, "guessit>gok2?>You are player two.", 33,0);
+        zmq_send(publisher, "guessit>gok3?>You are player three.", 35,0);
+    break;
+        /*
         //stuur restultaat
         guessplayer1 = atoi(ParsedString);
         printf("gok is %d\n", guessplayer1);
@@ -76,6 +103,7 @@ int main ( int argc, char * argv[] )
             zmq_send(publisher, "guessit>gok?>something wrong!", 30,0);
         }
         break;
+        */
     }
 
     zmq_close (publisher);
