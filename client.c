@@ -31,7 +31,10 @@ int main ( int argc, char * argv[] )
 {
     //bericht
     const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok!>";
+    const char *BerichtNaam = (argc > 1)? argv [1]: "guessit>naam!>";
 
+    char naam[10];
+    char sendnaam[100];
     char gok[10];
     char sendgok[100];
     char buffer[256];
@@ -58,7 +61,14 @@ int main ( int argc, char * argv[] )
         printf("Connection has been made! Goodluck!\n\n");
     }
 
-    rs = zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok?>", 13);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>naam?>", 14);
+    printf("What is your name?:");
+    scanf("%s", &naam);
+    strcpy(sendnaam, BerichtNaam);
+    strcat(sendnaam, naam);
+    zmq_send(publisher, sendnaam, strlen(sendnaam), 0);
+
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok?>", 13);
 
     //verzend uw gok naar server
     printf("What is your guess? ");
