@@ -74,32 +74,41 @@ int main ( int argc, char * argv[] )
         printf("The service is ready to go!\n\n");
     }
 
-    //individueel subscriben op namen players
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam, 10);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam2, 11);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam3, 11);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam4, 11);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam5, 11);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam6, 11);
-
-    //ontvang namen
-    for(int i = 0; i < 6; i++){
-        memset(buffer,0,256);
-        zmq_recv(subscriber, buffer, 256, 0);
-        player[i][9] = parse(3, buffer);
-        printf("Player %d's name is %s\n", i+1, player[i][9]);
-    }
-
-
-    //individueel subscriben op gokken players
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok, 8);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok4, 9);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok5, 9);
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, 9);
-
     while (1) {
+
+        //individueel subscriben op namen players
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam, 10);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam2, 11);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam3, 11);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam4, 11);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam5, 11);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam6, 11);
+
+        //ontvang namen
+        for(int i = 0; i < 6; i++){
+            memset(buffer,0,256);
+            zmq_recv(subscriber, buffer, 256, 0);
+            player[i][9] = parse(3, buffer);
+            printf("Player %d's name is %s\n", i+1, player[i][9]);
+        }
+
+        //individueel unsubscriben op namen players
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam, 10);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam2, 11);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam3, 11);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam4, 11);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam5, 11);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterNaam6, 11);
+
+
+        //individueel subscriben op gokken players
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok, 8);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok4, 9);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok5, 9);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, 9);
+
         //ontvang gokken
         for(int i = 0; i < 6; i++){
             memset(buffer,0,256);
