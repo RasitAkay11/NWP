@@ -67,6 +67,7 @@ int main ( int argc, char * argv[] )
     strcpy(sendnaam, BerichtNaam);
     strcat(sendnaam, naam);
     zmq_send(publisher, sendnaam, strlen(sendnaam), 0);
+    zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>naam?>", 14);
 
     rs = zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
 
