@@ -30,7 +30,15 @@ char *parse(int keer, char *ParseString)
 
 int main ( int argc, char * argv[] )
 {
-    //filter
+    //filter naam
+    const char *FilterNaam = (argc > 1)? argv [1]: "guessit>naam!>";
+    const char *FilterNaam2 = (argc > 1)? argv [1]: "guessit>naam2!>";
+    const char *FilterNaam3 = (argc > 1)? argv [1]: "guessit>naam3!>";
+    const char *FilterNaam4 = (argc > 1)? argv [1]: "guessit>naam4!>";
+    const char *FilterNaam5 = (argc > 1)? argv [1]: "guessit>naam5!>";
+    const char *FilterNaam6 = (argc > 1)? argv [1]: "guessit>naam6!>";
+
+    //filter gok
     const char *FilterGok = (argc > 1)? argv [1]: "guessit>gok!>";
     const char *FilterGok2 = (argc > 1)? argv [1]: "guessit>gok2!>";
     const char *FilterGok3 = (argc > 1)? argv [1]: "guessit>gok3!>";
@@ -40,6 +48,7 @@ int main ( int argc, char * argv[] )
 
     //variabelen
     int gok[6], highest = -100, lowest = 100, h, l, r; //h = highest player l = lowest player
+    char *player[6][10];
     srand(time(NULL));
     int rnd = rand() % 100 + 1;
     char buffer [256];
@@ -65,7 +74,24 @@ int main ( int argc, char * argv[] )
         printf("The service is ready to go!\n\n");
     }
 
-    //individueel subscriben op players
+    //individueel subscriben op namen players
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam, 10);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam2, 11);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam3, 11);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam4, 11);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam5, 11);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterNaam6, 11);
+
+    //ontvang namen
+    for(int i = 0; i < 6; i++){
+        memset(buffer,0,256);
+        zmq_recv(subscriber, buffer, 256, 0);
+        player[i][9] = parse(3, buffer);
+        printf("Player %d's name is %s\n", i+1, player[i][9]);
+    }
+
+
+    //individueel subscriben op gokken players
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok, 8);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
@@ -98,7 +124,7 @@ int main ( int argc, char * argv[] )
             }
             if(gok[i] < lowest){
                 lowest = gok[i];
-                l = l+1;
+                l = i+1;
             }
         }
 
@@ -106,24 +132,20 @@ int main ( int argc, char * argv[] )
 
         //uitslag bepalen.
         if(highest > 0 && lowest > 0){
-            printf("Eerste if");
             printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", h, highest+rnd);
             r = h;
         }
         else if(highest < 0 && lowest < 0){
-            printf("Eerste if");
             printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", l, lowest+rnd);
             r = l;
         }
         else if( (highest < 0 && lowest > 0) || (highest > 0 && lowest < 0)){
-            printf("Eerste if");
             int result = lowest + highest;
             if(result > 0){
                 printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", h, highest+rnd);
                 r = h;
             }
             else{
-                printf("Eerste if");
                 printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", l, lowest+rnd);
                 r = l;
             }
