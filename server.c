@@ -39,11 +39,13 @@ int main ( int argc, char * argv[] )
     const char *FilterGok6 = (argc > 1)? argv [1]: "guessit>gok6!>";
 
     //variabelen
-    int gok[6];
+    int gok[6], highest = -100, lowest = 100, h, l, r; //h = highest player l = lowest player
     srand(time(NULL));
     int rnd = rand() % 100 + 1;
     char buffer [256];
     char *ParsedString;
+
+    printf("Starting the service...\n");
 
     //connect
     void *context = zmq_ctx_new();
@@ -58,7 +60,12 @@ int main ( int argc, char * argv[] )
         printf("ERROR: ZeroMQ error occurred during zmq_ctx_new(): %s\n", zmq_strerror(errno));
 
         return EXIT_FAILURE;
+    } else{
+        sleep(2);
+        printf("The service is ready to go!\n\n");
     }
+
+    //individueel subscriben op players
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok, 8);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok2, 9);
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok3, 9);
@@ -74,52 +81,53 @@ int main ( int argc, char * argv[] )
             ParsedString = parse(3, buffer);
             printf("Player %d has guessed %s\n", i+1, ParsedString);
             gok[i] = atoi(ParsedString);
-        }/*
-        //ontvang gok1
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 1 has guessed %s\n", ParsedString);
-        gok[0] = atoi(ParsedString);
+        }
 
-        //ontvang gok2
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 2 has guessed %s\n", ParsedString);
-        gok[1] = atoi(ParsedString);
+        printf("\nplayer 1 %d\nplayer 2 %d\nplayer3 %d\nplayer4 %d\nplayer 5 %d\nplayer 6 %d\nThe number %d\n\n", gok[0], gok[1], gok[2], gok[3], gok[4], gok[5], rnd);
 
-        //ontvang gok3
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 3 has guessed %s\n", ParsedString);
-        gok[2] = atoi(ParsedString);
+        //De gokken gelijkstellen op de nul-as
+        for(int i = 0; i < 6; i++){
+            gok[i] = gok[i] - rnd;
+        }
 
-        //ontvang gok4
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 4 has guessed %s\n", ParsedString);
-        gok[3] = atoi(ParsedString);
+        //De grootste en de kleinste detecteren
+        for(int i = 0; i < 6; i++){
+            if(gok[i] > highest){
+                highest = gok[i];
+                h = i+1;
+            }
+            if(gok[i] < lowest){
+                lowest = gok[i];
+                l = l+1;
+            }
+        }
 
-        //ontvang gok5
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 5 has guessed %s\n", ParsedString);
-        gok[4] = atoi(ParsedString);
+        printf("The lowest is %d and the highest is %d", lowest+rnd, highest+rnd);
 
-        //ontvang gok6
-        memset(buffer,0,256);
-        zmq_recv (subscriber, buffer, 256, 0);
-        ParsedString = parse(3, buffer);
-        printf("Player 6 has guessed %s\n", ParsedString);
-        gok[5] = atoi(ParsedString);
-        */
-
-        printf("player 1 %d, player 2 %d, player3 %d, player4 %d, player 5 %d, player 6 %d\n\n", gok[0], gok[1], gok[2], gok[3], gok[4], gok[5]);
-
+        //uitslag bepalen.
+        if(highest > 0 && lowest > 0){
+            printf("Eerste if");
+            printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", h, highest+rnd);
+            r = h;
+        }
+        else if(highest < 0 && lowest < 0){
+            printf("Eerste if");
+            printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", l, lowest+rnd);
+            r = l;
+        }
+        else if( (highest < 0 && lowest > 0) || (highest > 0 && lowest < 0)){
+            printf("Eerste if");
+            int result = lowest + highest;
+            if(result > 0){
+                printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", h, highest+rnd);
+                r = h;
+            }
+            else{
+                printf("Eerste if");
+                printf("\nplayer %d guessed %d, but it is the farest, bye bye!\n", l, lowest+rnd);
+                r = l;
+            }
+        }
         zmq_send(publisher, "guessit>gok?>You are player one.", 32,0);
         zmq_send(publisher, "guessit>gok2?>You are player two.", 33,0);
         zmq_send(publisher, "guessit>gok3?>You are player three.", 35,0);
@@ -127,22 +135,7 @@ int main ( int argc, char * argv[] )
         zmq_send(publisher, "guessit>gok5?>You are player five.", 35,0);
         zmq_send(publisher, "guessit>gok6?>You are player six.", 34,0);
     break;
-        /*
-        //stuur restultaat
-        guessplayer1 = atoi(ParsedString);
-        printf("gok is %d\n", guessplayer1);
-        printf("nummer is %d\n", rnd);
-        if(guessplayer1 < rnd){
-            zmq_send(publisher, "guessit>gok?>Your guess is lower then the number", 49,0);
-        } else if(guessplayer1 > rnd){
-            zmq_send(publisher, "guessit>gok?>Your guess is higher then the number", 50,0);
-        } else if(guessplayer1 == rnd){
-            zmq_send(publisher, "guessit>gok?>U WON!", 20,0);
-        } else{
-            zmq_send(publisher, "guessit>gok?>something wrong!", 30,0);
-        }
-        break;
-        */
+
     }
 
     zmq_close (publisher);
