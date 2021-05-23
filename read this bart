@@ -1,0 +1,1 @@
+Server wacht niet op zmq_recv. Hij print meteen zijn eigen vraag. Dat is mijn prob, echt met de receive.
