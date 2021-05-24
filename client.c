@@ -30,7 +30,7 @@ char *parse(int keer, char *ParseString)
 int main ( int argc, char * argv[] )
 {
     //bericht
-    const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok!>";
+    const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok1!>";
     char gok[10];
     char sendgok[100];
     char buffer[256];
@@ -57,8 +57,9 @@ int main ( int argc, char * argv[] )
         printf("Connection has been made! Goodluck!\n\n");
     }
 
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok?>", 13);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok1?>", 14);
 
+    while(1){
     //Ontvang vraag en verstuur antwoord
     memset(buffer,0,256);
     zmq_recv(subscriber, buffer, 256,0);
@@ -75,6 +76,7 @@ int main ( int argc, char * argv[] )
     zmq_recv(subscriber, buffer, 256,0);
     ParsedString = parse(3, buffer);
     printf("%s", ParsedString);
+    }
 
     zmq_close (subscriber);
     zmq_ctx_destroy (context);
