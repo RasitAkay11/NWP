@@ -67,6 +67,7 @@ int main ( int argc, char * argv[] )
     printf("%s\n", ParsedString);
     printf("Fill in your guess between 0 and 100: ");
     scanf("%s", gok);
+    printf("\n");
     strcpy(sendgok, BerichtGok);
     strcat(sendgok, gok);
     zmq_send(publisher, sendgok, strlen(sendgok), 0);
@@ -75,7 +76,7 @@ int main ( int argc, char * argv[] )
     memset(buffer,0,256);
     zmq_recv(subscriber, buffer, 256,0);
     ParsedString = parse(3, buffer);
-    printf("%s", ParsedString);
+    printf("%s\n", ParsedString);
     }
 
     zmq_close (subscriber);
