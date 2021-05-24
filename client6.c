@@ -31,10 +31,7 @@ int main ( int argc, char * argv[] )
 {
     //bericht
     const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok6!>";
-    const char *BerichtNaam = (argc > 1)? argv [1]: "guessit>naam6!>";
 
-    char naam[10];
-    char sendnaam[100];
     char gok[10];
     char sendgok[100];
     char buffer[256];
@@ -61,22 +58,19 @@ int main ( int argc, char * argv[] )
         printf("Connection has been made! Goodluck!\n\n");
     }
 
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>naam?>", 14);
-    printf("What is your name?:");
-    scanf("%s", &naam);
-    strcpy(sendnaam, BerichtNaam);
-    strcat(sendnaam, naam);
-    zmq_send(publisher, sendnaam, strlen(sendnaam), 0);
-    zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>naam?>", 14);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok6?>", 14);
 
-    rs = zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok6?>", 14);
-
-    //verzend uw gok naar server
-    printf("What is your guess? ");
-    scanf("%s", &gok);
+    while(1){
+    //Ontvang vraag en verstuur antwoord
+    memset(buffer,0,256);
+    zmq_recv(subscriber, buffer, 256,0);
+    ParsedString = parse(3, buffer);
+    printf("%s\n", ParsedString);
+    printf("Fill in your guess between 0 and 100: ");
+    scanf("%s", gok);
     strcpy(sendgok, BerichtGok);
     strcat(sendgok, gok);
-    zmq_send (publisher, sendgok, strlen(sendgok), 0);
+    zmq_send(publisher, sendgok, strlen(sendgok), 0);
 
 
     //ontvang resultaat
@@ -84,7 +78,7 @@ int main ( int argc, char * argv[] )
     zmq_recv(subscriber, buffer, 256,0);
     ParsedString = parse(3, buffer);
     printf("%s", ParsedString);
-
+}
     zmq_close (subscriber);
     zmq_ctx_destroy (context);
     return 0;
