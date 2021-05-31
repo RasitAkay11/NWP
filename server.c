@@ -38,9 +38,12 @@ int main ( int argc, char * argv[] )
     const char *FilterGok5 = (argc > 1)? argv [1]: "guessit>gok5!>";
     const char *FilterGok6 = (argc > 1)? argv [1]: "guessit>gok6!>";
 
+    //filter join
+    const char *FilterJoin = (argc > 1)? argv [1]: "guessit>join!>";
+
     //variabelen
     srand(time(NULL));
-    int gok[6], rnd = rand() % 100 + 1,highest = -100, lowest = 100, h, l, r, round = 6; //h = highest player l = lowest player
+    int gok[6], rnd = rand() % 100 + 1, h, l, r, round = 6; //h = highest player l = lowest player
     char VraagGok [6][52], StuurResultaat[6][73], StuurKick[6][31], buffer[256], *ParsedString;
 
     //verzendlijst
@@ -73,8 +76,8 @@ int main ( int argc, char * argv[] )
     void *context = zmq_ctx_new();
     void *publisher = zmq_socket(context, ZMQ_PUSH);
     void *subscriber = zmq_socket(context, ZMQ_SUB);
-    int rp = zmq_connect(publisher, "tcp://benternet.backup.pxl-ea-ict.be:24041");
-    int rs = zmq_connect(subscriber, "tcp://benternet.backup.pxl-ea-ict.be:24042");
+    int rp = zmq_connect(publisher, "tcp://benternet.pxl-ea-ict.be:24041");
+    int rs = zmq_connect(subscriber, "tcp://benternet.pxl-ea-ict.be:24042");
 
     //check if connect failed
     if (rp != 0 && rs != 0){
@@ -118,55 +121,80 @@ int main ( int argc, char * argv[] )
             }
 
             //De grootste en de kleinste detecteren
+            int highest = -100, lowest = 100;
             for(int i = 0; i < round; i++){
                 if(gok[i] > highest){
                     highest = gok[i];
-                    h = i+1;
+                    h = i;
+                    printf("\nGrootste gedetecteerd.\n");
                 }
                 if(gok[i] < lowest){
                     lowest = gok[i];
-                    l = i+1;
+                    l = i;
+                    printf("Kleinste gedetecteerd.\n");
                 }
             }
 
             //uitslag bepalen.
             if(highest > 0 && lowest > 0){
                 r = h;
+                printf("\nUistlag bepalen eerste if.\n");
             }
             else if(highest < 0 && lowest < 0){
                 r = l;
+                printf("\nUistlag bepalen tweede if.\n");
             }
             else if( (highest < 0 && lowest > 0) || (highest > 0 && lowest < 0)){
                 int result = lowest + highest;
                 if(result > 0){
                     r = h;
+                    printf("\nUistlag bepalen derde if.\n");
                 }
                 else{
                     r = l;
+                    printf("\nUistlag bepalen vierde if.\n");
                 }
             }
 
-            printf("Dits is de waarde van r %d\n", r);
+            printf("\nWaarde van r: %d\n\n", r);
 
-            r = r-1;
             //Verzend de resultaten naar de spelers.
-            for(int i = 0; i < round; i++){
-                if(i == r){
-                    zmq_send(publisher, StuurKick[i], strlen(StuurKick[i]), 0);
-                }else{
-                    zmq_send(publisher, StuurResultaat[i], strlen(StuurResultaat[i]),0);
+            if(round > 1){
+                for(int i = 0; i < round; i++){
+                    if(i != r){
+                        zmq_send(publisher, StuurResultaat[i], strlen(StuurResultaat[i]),0);
+                        printf("%s\n", StuurResultaat[i]);
+                    }
+                    else{
+                        zmq_send(publisher, StuurKick[i], strlen(StuurKick[i]), 0);
+                        printf("%s\n", StuurKick[i]);
+                    }
                 }
+            }else{
+                zmq_send(publisher, StuurKick[r], strlen(StuurKick[r]), 0);
+                printf("%s\n", StuurResultaat[i]);
             }
 
             //Kick player out
-            for(int i = 0; i < 6; i++){
+            for(int i = r; i < 6; i++){
                 strcpy(VraagGok[i], VraagGok[i+1]);
                 strcpy(StuurKick[i], StuurKick[i+1]);
                 strcpy(StuurResultaat[i], StuurResultaat[i+1]);
             }
 
-            round--;
-            printf("Next round...\n\n");
+
+            printf("\n");
+
+                round--;
+                printf("Next round...\n\n");
+
+           if(round == 1){
+                zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoin, strlen(FilterJoin));
+                sleep(5);
+                zmq_send(publisher, "guessit>join?>Join back peeps", 28, 0);
+                zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterJoin, strlen(FilterJoin));
+                round = 6;
+            }
         }
     }
 
