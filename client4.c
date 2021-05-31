@@ -64,46 +64,54 @@ int main ( int argc, char * argv[] )
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
 
     while(1){
-    if(playing == false){
-        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
-        playing = true;
-        round = 0;
-    }
-    //Ontvang vraag en verstuur antwoord
-    memset(buffer,0,256);
-    zmq_recv(subscriber, buffer, 256,0);
-    ParsedString = parse(3, buffer);
-    printf("%s\n", ParsedString);
-    printf("Fill in your guess between 0 and 100: ");
-    scanf("%s", gok);
-    goki = atoi(gok);
-    while(((goki < 0) || (goki > 100))){
-        printf("\n");
-        printf("The service said between 0 and 100 u stupid fuck try again: ");
-        scanf("%s", gok);
-        goki = atoi(gok);
-    }
-    strcpy(sendgok, BerichtGok);
-    strcat(sendgok, gok);
-    zmq_send(publisher, sendgok, strlen(sendgok), 0);
+        //maak je klaar voor de volgende ronde
+        if(playing == false){
+            zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
+            playing = true;
+            round = 0;
+        }
 
-
-    //ontvang resultaat
-    memset(buffer,0,256);
-    zmq_recv(subscriber, buffer, 256,0);
-    ParsedString = parse(3, buffer);
-    printf("%s\n\n", ParsedString);
-    round++;
-    if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 6){
-        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok4?>", 14);
-        playing = false;
-        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>join?>", 14);
+        //Ontvang vraag
         memset(buffer,0,256);
         zmq_recv(subscriber, buffer, 256,0);
-        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>join?>", 14);
-        printf("The game has ended.. The service is starting a new game.\n\n");
+        ParsedString = parse(3, buffer);
+        printf("%s\n", ParsedString);
+        printf("Fill in your guess between 0 and 100: ");
+        scanf("%s", gok);
+        goki = atoi(gok);
+
+        //check of gok tussen de 0 en 100 is
+        while(((goki < 0) || (goki > 100))){
+            printf("\n");
+            printf("The service said between 0 and 100 u stupid fuck try again: ");
+            scanf("%s", gok);
+            goki = atoi(gok);
+        }
+
+        //verstuur antwoord
+        strcpy(sendgok, BerichtGok);
+        strcat(sendgok, gok);
+        zmq_send(publisher, sendgok, strlen(sendgok), 0);
+
+        //ontvang resultaat
+        memset(buffer,0,256);
+        zmq_recv(subscriber, buffer, 256,0);
+        ParsedString = parse(3, buffer);
+        printf("%s\n\n", ParsedString);
+        round++;
+
+        //als je hebt verloren, wacht op join commando
+        if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 6){
+            zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok4?>", 14);
+            playing = false;
+            zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>join?>", 14);
+            memset(buffer,0,256);
+            zmq_recv(subscriber, buffer, 256,0);
+            zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>join?>", 14);
+            printf("The game has ended.. The service is starting a new game.\n\n");
+        }
     }
-}
+
     zmq_close (subscriber);
     zmq_ctx_destroy (context);
     return 0;
