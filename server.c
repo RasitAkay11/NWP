@@ -55,12 +55,12 @@ int main ( int argc, char * argv[] )
     strcpy(VraagGok[5], "guessit>gok6?>The service wants to know your guess.");
 
     //ResultaatLijst
-    strcpy(StuurResultaat[0], "guessit>gok1?>Congratulations! You are not kicked! Next round loading...");
-    strcpy(StuurResultaat[1], "guessit>gok2?>Congratulations! You are not kicked! Next round loading...");
-    strcpy(StuurResultaat[2], "guessit>gok3?>Congratulations! You are not kicked! Next round loading...");
-    strcpy(StuurResultaat[3], "guessit>gok4?>Congratulations! You are not kicked! Next round loading...");
-    strcpy(StuurResultaat[4], "guessit>gok5?>Congratulations! You are not kicked! Next round loading...");
-    strcpy(StuurResultaat[5], "guessit>gok6?>Congratulations! You are not kicked! Next round loading...");
+    strcpy(StuurResultaat[0], "guessit>gok1?>Congratulations! You are not kicked!");
+    strcpy(StuurResultaat[1], "guessit>gok2?>Congratulations! You are not kicked!");
+    strcpy(StuurResultaat[2], "guessit>gok3?>Congratulations! You are not kicked!");
+    strcpy(StuurResultaat[3], "guessit>gok4?>Congratulations! You are not kicked!");
+    strcpy(StuurResultaat[4], "guessit>gok5?>Congratulations! You are not kicked!");
+    strcpy(StuurResultaat[5], "guessit>gok6?>Congratulations! You are not kicked!");
 
     //Laat player weten dat hij/zij gekickt is
     strcpy(StuurKick[0], "guessit>gok1?>Sadly, you lost.");
@@ -97,20 +97,22 @@ int main ( int argc, char * argv[] )
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, strlen(FilterGok6));
 
     while (1) {
-        for(int i = 0; i < 6; i++){
-            //Vraag een per een hun gok en ontvang gokken. Nummer ze
-            for(int i = 0; i < round; i++){
-                //stel uw vraag aan player[i]
-                zmq_send(publisher, VraagGok[i], strlen(VraagGok[i]),0);
+        for(int i = 0; i < round; i++){
+            //Vraag een per een hun gok en ontvang gokken.
+            if(round > 1){
+                for(int i = 0; i < round; i++){
+                    //stel uw vraag aan player[i]
+                    zmq_send(publisher, VraagGok[i], strlen(VraagGok[i]),0);
 
-                //ontvang uw antwoord van player[i];
-                memset(buffer,0,256);
-                zmq_recv(subscriber, buffer, 256, 0);
+                    //ontvang uw antwoord van player[i];
+                    memset(buffer,0,256);
+                    zmq_recv(subscriber, buffer, 256, 0);
 
-                //sla antwoord op in gok[i]
-                ParsedString = parse(3, buffer);
-                printf("Player %d has guessed %s\n", i+1, ParsedString);
-                gok[i] = atoi(ParsedString);
+                    //sla antwoord op in gok[i]
+                    ParsedString = parse(3, buffer);
+                    printf("Player %d has guessed %s\n", i+1, ParsedString);
+                    gok[i] = atoi(ParsedString);
+                }
             }
 
             printf("Getal is %d\n", rnd);
@@ -126,53 +128,39 @@ int main ( int argc, char * argv[] )
                 if(gok[i] > highest){
                     highest = gok[i];
                     h = i;
-                    printf("\nGrootste gedetecteerd.\n");
                 }
                 if(gok[i] < lowest){
                     lowest = gok[i];
                     l = i;
-                    printf("Kleinste gedetecteerd.\n");
                 }
             }
 
             //uitslag bepalen.
             if(highest > 0 && lowest > 0){
                 r = h;
-                printf("\nUistlag bepalen eerste if.\n");
             }
             else if(highest < 0 && lowest < 0){
                 r = l;
-                printf("\nUistlag bepalen tweede if.\n");
             }
             else if( (highest < 0 && lowest > 0) || (highest > 0 && lowest < 0)){
                 int result = lowest + highest;
                 if(result > 0){
                     r = h;
-                    printf("\nUistlag bepalen derde if.\n");
                 }
                 else{
                     r = l;
-                    printf("\nUistlag bepalen vierde if.\n");
                 }
             }
 
-            printf("\nWaarde van r: %d\n\n", r);
-
+            printf("waarde round %d\n", round);
             //Verzend de resultaten naar de spelers.
-            if(round > 1){
-                for(int i = 0; i < round; i++){
-                    if(i != r){
-                        zmq_send(publisher, StuurResultaat[i], strlen(StuurResultaat[i]),0);
-                        printf("%s\n", StuurResultaat[i]);
-                    }
-                    else{
-                        zmq_send(publisher, StuurKick[i], strlen(StuurKick[i]), 0);
-                        printf("%s\n", StuurKick[i]);
-                    }
+            for(int i = 0; i < round; i++){
+                if(i != r && round > 1){
+                    zmq_send(publisher, StuurResultaat[i], strlen(StuurResultaat[i]),0);
                 }
-            }else{
-                zmq_send(publisher, StuurKick[r], strlen(StuurKick[r]), 0);
-                printf("%s\n", StuurResultaat[i]);
+                else{
+                    zmq_send(publisher, StuurKick[i], strlen(StuurKick[i]), 0);
+                }
             }
 
             //Kick player out
@@ -190,10 +178,38 @@ int main ( int argc, char * argv[] )
 
            if(round == 1){
                 zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoin, strlen(FilterJoin));
-                sleep(5);
+                sleep(3);
                 zmq_send(publisher, "guessit>join?>Join back peeps", 28, 0);
                 zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterJoin, strlen(FilterJoin));
+                printf("Starting new game.");
+                rnd = rand() % 100 + 1;
                 round = 6;
+
+                //verzendlijst
+                strcpy(VraagGok[0], "guessit>gok1?>The service wants to know your guess.");
+                strcpy(VraagGok[1], "guessit>gok2?>The service wants to know your guess.");
+                strcpy(VraagGok[2], "guessit>gok3?>The service wants to know your guess.");
+                strcpy(VraagGok[3], "guessit>gok4?>The service wants to know your guess.");
+                strcpy(VraagGok[4], "guessit>gok5?>The service wants to know your guess.");
+                strcpy(VraagGok[5], "guessit>gok6?>The service wants to know your guess.");
+
+                //ResultaatLijst
+                strcpy(StuurResultaat[0], "guessit>gok1?>Congratulations! You are not kicked!");
+                strcpy(StuurResultaat[1], "guessit>gok2?>Congratulations! You are not kicked!");
+                strcpy(StuurResultaat[2], "guessit>gok3?>Congratulations! You are not kicked!");
+                strcpy(StuurResultaat[3], "guessit>gok4?>Congratulations! You are not kicked!");
+                strcpy(StuurResultaat[4], "guessit>gok5?>Congratulations! You are not kicked!");
+                strcpy(StuurResultaat[5], "guessit>gok6?>Congratulations! You are not kicked!");
+
+                //Laat player weten dat hij/zij gekickt is
+                strcpy(StuurKick[0], "guessit>gok1?>Sadly, you lost.");
+                strcpy(StuurKick[1], "guessit>gok2?>Sadly, you lost.");
+                strcpy(StuurKick[2], "guessit>gok3?>Sadly, you lost.");
+                strcpy(StuurKick[3], "guessit>gok4?>Sadly, you lost.");
+                strcpy(StuurKick[4], "guessit>gok5?>Sadly, you lost.");
+                strcpy(StuurKick[5], "guessit>gok6?>Sadly, you lost.");
+
+                sleep(2);
             }
         }
     }
