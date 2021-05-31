@@ -31,7 +31,7 @@ char *parse(int keer, char *ParseString)
 int main ( int argc, char * argv[] )
 {
     //bericht
-    const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok5!>";
+    const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok4!>";
     bool playing = true;
     int goki = 0;
     char gok[10];
@@ -60,11 +60,11 @@ int main ( int argc, char * argv[] )
         printf("Connection has been made! Goodluck!\n\n");
     }
 
-    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok5?>", 14);
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
 
     while(1){
     if(playing == false){
-        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok5?>", 14);
+        zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok4?>", 14);
     }
     //Ontvang vraag en verstuur antwoord
     memset(buffer,0,256);
@@ -91,7 +91,7 @@ int main ( int argc, char * argv[] )
     ParsedString = parse(3, buffer);
     printf("%s\n", ParsedString);
     if((strcmp(ParsedString, "Sadly, you lost.")) == 0){
-        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok5?>", 14);
+        zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok4?>", 14);
         playing = false;
         printf("\n");
     }
