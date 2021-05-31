@@ -95,6 +95,7 @@ int main ( int argc, char * argv[] )
     round++;
     if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 6){
         zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok1?>", 14);
+        playing = false;
         zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>join?>", 14);
         memset(buffer,0,256);
         zmq_recv(subscriber, buffer, 256,0);
