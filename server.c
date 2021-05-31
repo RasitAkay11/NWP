@@ -7,7 +7,7 @@
 #include <time.h>
 #include <windows.h>
 
-char *strsep(char **stringp, const char *delim) {
+char *strsep(char **stringp, const char *delim){
     char *rv = *stringp;
     if (rv) {
         *stringp += strcspn(*stringp, delim);
@@ -17,8 +17,7 @@ char *strsep(char **stringp, const char *delim) {
             *stringp = 0; }
     return rv;
 }
-char *parse(int keer, char *ParseString)
-{
+char *parse(int keer, char *ParseString){
     char *String,*ParsedString;
     String = strdup(ParseString);
     for (int i = 0; i < keer; i++)
@@ -28,8 +27,7 @@ char *parse(int keer, char *ParseString)
     return ParsedString;
 }
 
-int main ( int argc, char * argv[] )
-{
+int main(int argc,char * argv[]){
     //filter gok
     const char *FilterGok1 = (argc > 1)? argv [1]: "guessit>gok1!>";
     const char *FilterGok2 = (argc > 1)? argv [1]: "guessit>gok2!>";
@@ -96,7 +94,7 @@ int main ( int argc, char * argv[] )
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok5, strlen(FilterGok5));
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, strlen(FilterGok6));
 
-    while (1) {
+    while (1){
         for(int i = 0; i < round; i++){
             //Vraag een per een hun gok en ontvang gokken.
             if(round > 1){
@@ -115,7 +113,7 @@ int main ( int argc, char * argv[] )
                 }
             }
 
-            printf("Getal is %d\n", rnd);
+            printf("random nummer is %d\n", rnd);
 
             //De gokken gelijkstellen op de nul-as
             for(int i = 0; i < round; i++){
@@ -152,7 +150,6 @@ int main ( int argc, char * argv[] )
                 }
             }
 
-            printf("waarde round %d\n", round);
             //Verzend de resultaten naar de spelers.
             for(int i = 0; i < round; i++){
                 if(i != r && round > 1){
@@ -170,18 +167,17 @@ int main ( int argc, char * argv[] )
                 strcpy(StuurResultaat[i], StuurResultaat[i+1]);
             }
 
+            round--;
+            printf("Next round...\n\n");
 
-            printf("\n");
-
-                round--;
-                printf("Next round...\n\n");
-
+           //game is gedaan, alles klaarzetten voor nieuwe game
            if(round == 1){
                 zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoin, strlen(FilterJoin));
                 sleep(3);
                 zmq_send(publisher, "guessit>join?>Join back peeps", 28, 0);
                 zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterJoin, strlen(FilterJoin));
                 printf("Starting new game.");
+                srand(time(NULL));
                 rnd = rand() % 100 + 1;
                 round = 6;
 
@@ -209,6 +205,7 @@ int main ( int argc, char * argv[] )
                 strcpy(StuurKick[4], "guessit>gok5?>Sadly, you lost.");
                 strcpy(StuurKick[5], "guessit>gok6?>Sadly, you lost.");
 
+                //Wacht op players op hun terug te subscriben op guessit>gok?>
                 sleep(2);
             }
         }
