@@ -34,6 +34,7 @@ int main ( int argc, char * argv[] )
     const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok1!>";
     bool playing = true;
     int goki = 0;
+    int round = 6;
     char gok[10];
     char sendgok[100];
     char buffer[256];
@@ -66,6 +67,7 @@ int main ( int argc, char * argv[] )
     if(playing == false){
         zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok1?>", 14);
         playing = true;
+        round = 0;
     }
     //Ontvang vraag en verstuur antwoord
     memset(buffer,0,256);
@@ -89,20 +91,16 @@ int main ( int argc, char * argv[] )
     memset(buffer,0,256);
     zmq_recv(subscriber, buffer, 256,0);
     ParsedString = parse(3, buffer);
-    printf("%s\n", ParsedString);
-    if((strcmp(ParsedString, "Sadly, you lost.")) == 0){
+    printf("%s\n\n", ParsedString);
+    round++;
+    if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 6){
         zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok1?>", 14);
-        playing = false;
-        printf("\n");
-    }
-    if (playing == false){
         zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>join?>", 14);
         memset(buffer,0,256);
         zmq_recv(subscriber, buffer, 256,0);
-        ParsedString = parse(3, buffer);
-        printf("%s", ParsedString);
         zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>join?>", 14);
-        printf("The game has ended.. The service is starting another game.\n\n");
+        printf("The game has ended.. The service is starting a new game.\n\n");
+        playing = false;
     }
     }
     zmq_close (subscriber);
