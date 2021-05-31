@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-char *strsep(char **stringp, const char *delim) {
+char *strsep(char **stringp, const char *delim){
     char *rv = *stringp;
     if (rv) {
         *stringp += strcspn(*stringp, delim);
@@ -17,8 +17,7 @@ char *strsep(char **stringp, const char *delim) {
     return rv;
 }
 
-char *parse(int keer, char *ParseString)
-{
+char *parse(int keer, char *ParseString){
     char *String,*ParsedString;
     String = strdup(ParseString);
     for (int i = 0; i < keer; i++)
@@ -28,8 +27,7 @@ char *parse(int keer, char *ParseString)
     return ParsedString;
 }
 
-int main ( int argc, char * argv[] )
-{
+int main ( int argc, char * argv[] ){
     //bericht
     const char *BerichtGok = (argc > 1)? argv [1]: "guessit>gok2!>";
     bool playing = true;
