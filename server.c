@@ -74,8 +74,8 @@ int main(int argc,char * argv[]){
     void *context = zmq_ctx_new();
     void *publisher = zmq_socket(context, ZMQ_PUSH);
     void *subscriber = zmq_socket(context, ZMQ_SUB);
-    int rp = zmq_connect(publisher, "tcp://benternet.backup.pxl-ea-ict.be:24041");
-    int rs = zmq_connect(subscriber, "tcp://benternet.backup.pxl-ea-ict.be:24042");
+    int rp = zmq_connect(publisher, "tcp://benternet.pxl-ea-ict.be:24041");
+    int rs = zmq_connect(subscriber, "tcp://benternet.pxl-ea-ict.be:24042");
 
     //check if connect failed
     if (rp != 0 && rs != 0){
