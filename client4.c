@@ -40,8 +40,8 @@ int main(int argc, char * argv[]){
     printf("The rules are easy.. You will race against 5 other people!\nThe person who will be the closest to the random number every 6 rounds wins! Except if someone already guesses it!\n\nMaking connection with the server...\n");
 
     //connect
-    int rp = zmq_connect(publisher, "tcp://benternet.backup.pxl-ea-ict.be:24041");
-    int rs = zmq_connect(subscriber, "tcp://benternet.backup.pxl-ea-ict.be:24042" );
+    int rp = zmq_connect(publisher, "tcp://benternet.pxl-ea-ict.be:24041");
+    int rs = zmq_connect(subscriber, "tcp://benternet.pxl-ea-ict.be:24042" );
 
     sleep (1);
 
@@ -86,11 +86,12 @@ int main(int argc, char * argv[]){
         round++;
 
         //als je hebt verloren, wacht op join commando
-        if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 6){
+        if((strcmp(ParsedString, "Sadly, you lost.")) == 0 || round == 5){
             zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>gok4?>", 14);
             zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>join?>", 14);
             memset(buffer,0,256);
             zmq_recv(subscriber, buffer, 256,0);
+            sleep(4);
             zmq_send(publisher, "guessit>join!>Player4 is back", 29, 0);
             zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>join?>", 14);
             printf("The game has ended.. The service is starting a new game.\n\n");
