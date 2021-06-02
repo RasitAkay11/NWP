@@ -74,8 +74,8 @@ int main(int argc,char * argv[]){
     void *context = zmq_ctx_new();
     void *publisher = zmq_socket(context, ZMQ_PUSH);
     void *subscriber = zmq_socket(context, ZMQ_SUB);
-    int rp = zmq_connect(publisher, "tcp://benternet.pxl-ea-ict.be:24041");
-    int rs = zmq_connect(subscriber, "tcp://benternet.pxl-ea-ict.be:24042");
+    int rp = zmq_connect(publisher, "tcp://benternet.backup.pxl-ea-ict.be:24041");
+    int rs = zmq_connect(subscriber, "tcp://benternet.backup.pxl-ea-ict.be:24042");
 
     //check if connect failed
     if (rp != 0 && rs != 0){
@@ -175,8 +175,14 @@ int main(int argc,char * argv[]){
                 zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoin, strlen(FilterJoin));
                 sleep(3);
                 zmq_send(publisher, "guessit>join?>Join back peeps", 28, 0);
+                for(int i = 0; i < 6; i++){
+                    memset(buffer,0,256);
+                    zmq_recv(subscriber, buffer, 256,0);
+                    ParsedString = parse(3, buffer);
+                    printf("%d. %s\n", i+1, ParsedString);
+                }
                 zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, FilterJoin, strlen(FilterJoin));
-                printf("Starting new game.");
+                printf("\nStarting new game.\n");
                 srand(time(NULL));
                 rnd = rand() % 100 + 1;
                 round = 6;
