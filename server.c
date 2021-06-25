@@ -36,13 +36,23 @@ int main(int argc,char * argv[]){
     const char *FilterGok5 = (argc > 1)? argv [1]: "guessit>gok5!>";
     const char *FilterGok6 = (argc > 1)? argv [1]: "guessit>gok6!>";
 
+    //filter gok
+    const char *FilterJoker1 = (argc > 1)? argv [1]: "guessit>joker1?>";
+    const char *FilterJoker2 = (argc > 1)? argv [1]: "guessit>joker2?>";
+    const char *FilterJoker3 = (argc > 1)? argv [1]: "guessit>joker3?>";
+    const char *FilterJoker4 = (argc > 1)? argv [1]: "guessit>joker4?>";
+    const char *FilterJoker5 = (argc > 1)? argv [1]: "guessit>joker5?>";
+    const char *FilterJoker6 = (argc > 1)? argv [1]: "guessit>joker6?>";
+
     //filter join
     const char *FilterJoin = (argc > 1)? argv [1]: "guessit>join!>";
 
     //variabelen
     srand(time(NULL));
-    int gok[6], rnd = rand() % 100 + 1, h, l, r, round = 6; //h = highest player l = lowest player
-    char VraagGok [6][52], StuurResultaat[6][73], StuurKick[6][31], buffer[256], *ParsedString;
+    int gok[6], rnd = rand() % 100 + 1, h, l, r, round = 6, dichtsbijk = -100, dichtsbijg = 100; //h = highest player l = lowest player
+    int spelerlaagste = -1, spelerhoogste = -1, spelerwie = -1;
+    char VraagGok [6][52], StuurResultaat[6][73], StuurKick[6][31], buffer[256], stuurdichtsteja[6][43], stuurdichtstenee[6][47], *ParsedString;
+    char BerichtDichts[256] = "guessit>dichts?>";
 
     //verzendlijst
     strcpy(VraagGok[0], "guessit>gok1?>The service wants to know your guess.");
@@ -67,6 +77,22 @@ int main(int argc,char * argv[]){
     strcpy(StuurKick[3], "guessit>gok4?>Sadly, you lost.");
     strcpy(StuurKick[4], "guessit>gok5?>Sadly, you lost.");
     strcpy(StuurKick[5], "guessit>gok6?>Sadly, you lost.");
+
+    //Laat player weten of die het dichtste bij was
+    strcpy(stuurdichtsteja[0], "guessit>dichts1?>You are the closest one.");
+    strcpy(stuurdichtsteja[1], "guessit>dichts2?>You are the closest one.");
+    strcpy(stuurdichtsteja[2], "guessit>dichts3?>You are the closest one.");
+    strcpy(stuurdichtsteja[3], "guessit>dichts4?>You are the closest one.");
+    strcpy(stuurdichtsteja[4], "guessit>dichts5?>You are the closest one.");
+    strcpy(stuurdichtsteja[5], "guessit>dichts6?>You are the closest one.");
+
+    //Laat player weten dat hij/zij niet het dichste bij is
+    strcpy(stuurdichtstenee[0], "guessit>dichts1?>You are not the closest one.");
+    strcpy(stuurdichtstenee[1], "guessit>dichts2?>You are not the closest one.");
+    strcpy(stuurdichtstenee[2], "guessit>dichts3?>You are not the closest one.");
+    strcpy(stuurdichtstenee[3], "guessit>dichts4?>You are not the closest one.");
+    strcpy(stuurdichtstenee[4], "guessit>dichts5?>You are not the closest one.");
+    strcpy(stuurdichtstenee[5], "guessit>dichts6?>You are not the closest one.");
 
     printf("Starting the service...\n");
 
@@ -94,6 +120,13 @@ int main(int argc,char * argv[]){
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok5, strlen(FilterGok5));
     zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterGok6, strlen(FilterGok6));
 
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker1, strlen(FilterJoker1));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker2, strlen(FilterJoker2));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker3, strlen(FilterJoker3));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker4, strlen(FilterJoker4));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker5, strlen(FilterJoker5));
+    zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, FilterJoker6, strlen(FilterJoker6));
+
     while (1){
         for(int i = 0; i < round; i++){
             //Vraag een per een hun gok en ontvang gokken.
@@ -108,8 +141,13 @@ int main(int argc,char * argv[]){
 
                     //sla antwoord op in gok[i]
                     ParsedString = parse(3, buffer);
-                    printf("Player %d has guessed %s\n", i+1, ParsedString);
-                    gok[i] = atoi(ParsedString);
+                    printf("%s\n", ParsedString);
+                    if(strcmp(ParsedString, "I want to use my joker.") == 0){
+                        gok[i] = rnd;
+                    }else{
+                        printf("Player %d has guessed %s\n", i+1, ParsedString);
+                        gok[i] = atoi(ParsedString);
+                    }
                 }
             }
 
@@ -150,6 +188,36 @@ int main(int argc,char * argv[]){
                 }
             }
 
+            //Dichtsbij detecteren
+            for(int i = 0; i < round; i++){
+                gok[i] = gok[i] + rnd;
+            }
+
+            for(int i = 0; i< round; i++){
+                if(gok[i] <= rnd){
+                    if(gok[i] > dichtsbijk){
+                        dichtsbijk = gok[i];
+                        spelerlaagste = i;
+                    }
+                }
+            }
+
+            for(int i = 0; i < round; i++){
+                if(gok[i] >= rnd){
+                    if(gok[i] < dichtsbijg){
+                        dichtsbijg = gok[i];
+                        spelerhoogste = i;
+                    }
+                }
+            }
+
+
+
+            printf("\nDit waren de gokken:\n");
+            for(int i = 0; i < round; i++){
+                printf("%d\n", gok[i]);
+            }
+
             //Verzend de resultaten naar de spelers.
             for(int i = 0; i < round; i++){
                 if(i != r && round > 1){
@@ -160,15 +228,67 @@ int main(int argc,char * argv[]){
                 }
             }
 
+            sleep(2);
+
+            //Verzend de gok die het dichts bij is
+            if(dichtsbijk == -100){
+                char dichtsbijstr[10];
+                itoa(dichtsbijg, dichtsbijstr, 10);
+                strcat(BerichtDichts, dichtsbijstr);
+                spelerwie = spelerhoogste;
+                zmq_send(publisher, BerichtDichts, strlen(BerichtDichts), 0);
+            }else if(dichtsbijg == 100){
+                char dichtsbijstr[10];
+                itoa(dichtsbijk, dichtsbijstr, 10);
+                strcat(BerichtDichts, dichtsbijstr);
+                spelerwie = spelerlaagste;
+                zmq_send(publisher, BerichtDichts, strlen(BerichtDichts), 0);
+            }else if(dichtsbijk != -100 && dichtsbijg != 100){
+                dichtsbijg = dichtsbijg - rnd;
+                dichtsbijk = dichtsbijk - rnd;
+                int resultaat = dichtsbijg - dichtsbijk;
+                if(resultaat > 0){
+                    char dichtsbijstr[10];
+                    itoa(dichtsbijk, dichtsbijstr, 10);
+                    strcat(BerichtDichts, dichtsbijstr);
+                    spelerwie = spelerlaagste;
+                    zmq_send(publisher, BerichtDichts, strlen(BerichtDichts), 0);
+                } else if(resultaat < 0){
+                    char dichtsbijstr[10];
+                    itoa(dichtsbijg, dichtsbijstr, 10);
+                    strcat(BerichtDichts, dichtsbijstr);
+                    spelerwie = spelerhoogste;
+                    zmq_send(publisher, BerichtDichts, strlen(BerichtDichts), 0);
+                }
+            }
+
+            sleep(2);
+            //Stuur naar speler of die dichste is of niet
+            for(int i = 0; i< round; i++){
+                if(i != spelerwie){
+                    zmq_send(publisher, stuurdichtstenee[i], 45, 0);
+                } else{
+                    zmq_send(publisher, stuurdichtsteja[i], 41, 0);
+                }
+            }
+
             //Kick player out
             for(int i = r; i < 6; i++){
                 strcpy(VraagGok[i], VraagGok[i+1]);
                 strcpy(StuurKick[i], StuurKick[i+1]);
                 strcpy(StuurResultaat[i], StuurResultaat[i+1]);
+                strcpy(stuurdichtsteja[i], stuurdichtsteja[i+1]);
+                strcpy(stuurdichtstenee[i], stuurdichtstenee[i+1]);
             }
 
+
+            spelerhoogste = -1;
+            spelerlaagste = -1;
+            spelerwie = -1;
+            strcpy(BerichtDichts, "guessit>dichts!>");
             round--;
             printf("Next round...\n\n");
+
 
            //game is gedaan, alles klaarzetten voor nieuwe game
            if(round == 1){
@@ -210,6 +330,22 @@ int main(int argc,char * argv[]){
                 strcpy(StuurKick[3], "guessit>gok4?>Sadly, you lost.");
                 strcpy(StuurKick[4], "guessit>gok5?>Sadly, you lost.");
                 strcpy(StuurKick[5], "guessit>gok6?>Sadly, you lost.");
+
+                //Laat player weten of die het dichtste bij was
+                strcpy(stuurdichtsteja[0], "guessit>dichts1?>You are the closest one.");
+                strcpy(stuurdichtsteja[1], "guessit>dichts2?>You are the closest one.");
+                strcpy(stuurdichtsteja[2], "guessit>dichts3?>You are the closest one.");
+                strcpy(stuurdichtsteja[3], "guessit>dichts4?>You are the closest one.");
+                strcpy(stuurdichtsteja[4], "guessit>dichts5?>You are the closest one.");
+                strcpy(stuurdichtsteja[5], "guessit>dichts6?>You are the closest one.");
+
+                //Laat player weten dat hij/zij niet het dichste bij is
+                strcpy(stuurdichtstenee[0], "guessit>dichts1?>You are not the closest one.");
+                strcpy(stuurdichtstenee[1], "guessit>dichts2?>You are not the closest one.");
+                strcpy(stuurdichtstenee[2], "guessit>dichts3?>You are not the closest one.");
+                strcpy(stuurdichtstenee[3], "guessit>dichts4?>You are not the closest one.");
+                strcpy(stuurdichtstenee[4], "guessit>dichts5?>You are not the closest one.");
+                strcpy(stuurdichtstenee[5], "guessit>dichts6?>You are not the closest one.");
 
                 //Wacht op players op hun terug te subscriben op guessit>gok?>
                 sleep(2);
