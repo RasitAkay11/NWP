@@ -93,8 +93,15 @@ int main(int argc, char * argv[]){
             zmq_recv(subscriber, buffer, 256,0);
             sleep(1);
             zmq_send(publisher, "guessit>join!>Player1 is back", 29, 0);
+
             zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>join?>", 14);
+            zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>tip?>", 13);
             printf("The game has ended.. The service is starting a new game.\n\n");
+            memset(buffer,0,256);
+            zmq_recv(subscriber, buffer, 256,0);
+            ParsedString = parse(3, buffer);
+            printf("%s\n\n", ParsedString);
+            zmq_setsockopt(subscriber, ZMQ_UNSUBSCRIBE, "guessit>tip?>", 13);
             zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, "guessit>gok1?>", 14);
             round = 0;
         }
